@@ -11,3 +11,7 @@ dependencies:
     version: 7.6.1
     src: htmlwidgets/lib/d3
     script: d3.v7.min.js
+  - name: scimvis
+    version: 1.0.0
+    src: htmlwidgets/lib/scimvis
+    script: index.js
