@@ -1,0 +1,13 @@
+dependencies:
+  - name: threejs
+    version: 4.5.0
+    src: htmlwidgets/lib/threejs
+    script:
+      - three.js
+      - OrbitControls.js
+      - FontLoader.js
+      - TextGeometry.js
+  - name: d3
+    version: 7.6.1
+    src: htmlwidgets/lib/d3
+    script: d3.v7.min.js
