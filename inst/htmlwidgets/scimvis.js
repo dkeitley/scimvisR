@@ -14,13 +14,12 @@ HTMLWidgets.widget({
 
         //el.innerHTML = "test";
 
-        var r_data = HTMLWidgets.dataframeToD3(x.r_data);
-        var m_data = HTMLWidgets.dataframeToD3(x.m_data);
+        var a_data = HTMLWidgets.dataframeToD3(x.a_data.data);
+        var b_data = HTMLWidgets.dataframeToD3(x.b_data.data);
+        var mappings = x.mappings;
 
-        //render_scimvis(el, data);
-
-        initScimvis(el, r_data, m_data)
-
+        renderSCIMVIS(el, a_data, b_data, mappings,
+        x.a_data.title, x.b_data.title);
 
 
       },

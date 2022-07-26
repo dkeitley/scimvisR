@@ -2,17 +2,27 @@
 % Please edit documentation in R/scimvis.R
 \name{scimvis}
 \alias{scimvis}
-\title{<Add Title>}
+\title{Display a scimvis widget.}
 \usage{
 scimvis(
-  r_data,
-  m_data,
-  nhood_sim,
+  a_data,
+  b_data,
+  dist_mat,
+  dimred = "UMAP",
+  N_max = 5,
+  colour_by,
+  palette,
+  a_title = "Dataset A",
+  b_title = "Dataset B",
   width = NULL,
   height = NULL,
   elementId = NULL
 )
 }
+\arguments{
+\item{dist_mat}{A matrix of distance/similarity values between points of
+a_data and b_data.}
+}
 \description{
-<Add Description>
+Display a scimvis widget.
 }
