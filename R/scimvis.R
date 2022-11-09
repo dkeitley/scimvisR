@@ -23,6 +23,7 @@ getTopN <- function(sim_mat, N, margin=1) {
   }
 }
 
+#' @importFrom SingleCellExperiment reducedDimNames
 .checkDimred <- function(data, dimred) {
   # Check dimred option is present
   if(!(dimred %in% reducedDimNames(data))) {
@@ -69,6 +70,7 @@ prepareNhoodData <- function(milo, dimred, colour_by, palette) {
 }
 
 #' Check that the mapping object actually corresponds to points in a_data and b_data
+#' @importFrom miloR nhoods
 .checkDistMat <- function(a_data, b_data, dist_mat) {
   # Assumes Milo object for now...
   if(!isTRUE(all.equal(dim(dist_mat), c(ncol(nhoods(a_data)), ncol(nhoods(b_data)))))) {

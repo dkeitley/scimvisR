@@ -1,3 +1,5 @@
+
+
 // TODO: Load as an NPM package
 // import { scimvis } from 'scimvis';
 
@@ -9,52 +11,94 @@
 let svg;
 
 // set the dimensions and margins of the graph
-var margin = {top: 10, right: 30, bottom: 30, left: 60},
-	    width = 1200 - margin.left - margin.right,
-	    height = 600 - margin.top - margin.bottom;
-
-
-const axes_gap = 100;
-const point_size = 2.5;
+let VIS_MARGIN , VIS_HEIGHT , VIS_WIDTH , AXES_GAP;
 const opacity_low = 0.1;
 
 
+function SCIMVIS_2D(el, width, height) {
+  var self = this;
+  var width = width;
+  var height = height;
+  var el= el;
+  var a_data = {};
+  var b_data = {};
+  var mappings = {};
+  var a_title = "";
+  var b_title = "";
 
-function renderSCIMVIS(el, a_data, b_data, mappings, a_title, b_title) {
+  this.renderSCIMVIS = function(el, a_data, b_data, mappings, a_title, b_title,
+          width, height) {
 
-	console.log("RENDERING SCIMVIS...");
+  	console.log("RENDERING SCIMVIS...");
 
-  svg = d3.select(el)
-	  .append("svg")
-	    .attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom)
-	  .append("g")
-	    .attr("transform",
-	          "translate(" + margin.left + "," + margin.top + ")");
+  	this.a_data = a_data;
+  	this.b_data = b_data;
+    this.mappings = mappings;
+    this.a_title = a_title;
+    this.b_title = b_title;
 
-	 var a_pos = {
-      xrange: [ 0, (width)/2 - axes_gap/2 ],
-      yrange: [ height, 0]
+  	console.log(width);
+  	console.log(height);
 
-   }
+  	VIS_MARGIN = {top: 20, right: 20, bottom: 20, left: 20};
+    VIS_HEIGHT = height - VIS_MARGIN.top - VIS_MARGIN.bottom;
+    VIS_WIDTH = width - VIS_MARGIN.left - VIS_MARGIN.right;
+    AXES_GAP = 50;
 
-   var b_pos = {
-     xrange: [ (width)/2 + axes_gap/2, width ],
-     yrange: [ height, 0]
-   }
+    console.log(VIS_WIDTH);
+  	console.log(VIS_HEIGHT);
 
 
-  // Dipslay datasets
-  var a_dataset = new Dataset(id = "a", data = a_data, name = a_title);
-  var b_dataset = new Dataset(id = "b", data = b_data, name = b_title);
+    svg = d3.select(el)
+  	  .append("svg")
+  	    .attr("width",width )
+  	    .attr("height",height )
+  	 // .append("g")
+  	  //  .attr("transform",
+  	   //      "translate(" + VIS_MARGIN.left + "," + VIS_MARGIN.top + ")");
 
-  a_dataset.show(svg, a_pos);
-  b_dataset.show(svg, b_pos);
+  	 var a_pos = {
+        xrange: [ 0, (VIS_WIDTH)/2 - AXES_GAP/2 ],
+        yrange: [ VIS_HEIGHT, 0]
 
-  // Make points interactive
-  var link = new DatasetLink(a_dataset, b_dataset, mappings)
-  link.linkDatasets(0);
+     }
 
+     var b_pos = {
+       xrange: [(VIS_WIDTH)/2 + AXES_GAP/2, VIS_WIDTH + AXES_GAP/2 ],
+       yrange: [ VIS_HEIGHT, 0]
+     }
+
+    console.log(a_pos);
+    console.log(b_pos);
+
+    // Dipslay datasets
+    var a_dataset = new Dataset(id = "a", data = a_data, name = a_title);
+    var b_dataset = new Dataset(id = "b", data = b_data, name = b_title);
+
+    a_dataset.show(svg, a_pos);
+    b_dataset.show(svg, b_pos);
+
+    // Make points interactive
+    var link = new DatasetLink(a_dataset, b_dataset, mappings)
+    link.linkDatasets(0);
+
+
+  }
+
+  this.resize = function(width, height) {
+
+    console.log("Resizing...");
+    console.log("Resized width: " + width);
+    console.log("Resized height: " + height);
+
+    this.width = width;
+    this.height = height;
+
+    //self.renderSCIMVIS(this.el, this.a_data, this.b_data, this.mappings,
+    //this.a_title, this.b_title, width, height)
+
+
+  }
 
 }
 
@@ -72,7 +116,7 @@ function Dataset (id, data, title) {
 
   // Dataset settings (e.g. point size)
   var config = {
-    point_size: 2.5
+    point_size: 10
   }
 
   // Creates X and Y axes using D3
@@ -83,7 +127,7 @@ function Dataset (id, data, title) {
   	    .domain([0, 1])
   	    .range(pos.xrange);
   	svg.append("g")
-  	    .attr("transform", "translate(0," + height + ")")
+  	    .attr("transform", "translate(0," + VIS_HEIGHT + ")")
   	    .call(d3.axisBottom(x_axis));
 
   	// Add Y axis
@@ -225,6 +269,7 @@ function DatasetLink(a_data, b_data, mapping) {
         d3.select("#" + datasets[direction].getID() + "_" + i.id).transition()
             .duration('200')
             .attr("r", datasets[direction].getPointSize());
+            // TODO: Reset stroke width
 
         self.showMappings(i, config.opacity_low, datasets[1-direction].getPointSize(), false);
     })
@@ -249,9 +294,6 @@ function DatasetLink(a_data, b_data, mapping) {
 
 //var sim = [];
 //var nhood_ids = {};
-
-
-
 
 
 
