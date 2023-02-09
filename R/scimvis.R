@@ -99,8 +99,11 @@ prepareMappings <- function(dist_mat, N_max) {
 
   # TODO: Multiple dispatch based on type of a_data, b_data
 
-  a_df <- prepareNhoodData(a_milo, dimred, colour_by = colour_by, palette = palette)
-  b_df <- prepareNhoodData(b_milo, dimred, colour_by = colour_by, palette = palette)
+  # Allows for different dimred for each dataset
+  if(length(dimred) == 1) { dimred <- rep(dimred, 2)}
+
+  a_df <- prepareNhoodData(a_milo, dimred[1], colour_by = colour_by, palette = palette)
+  b_df <- prepareNhoodData(b_milo, dimred[2], colour_by = colour_by, palette = palette)
 
   .checkDistMat(a_milo, b_milo, dist_mat)
   mappings <- getTopN(dist_mat, N_max)
