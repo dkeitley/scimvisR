@@ -8,7 +8,7 @@ getTopN <- function(sim_mat, N, margin=1) {
   sim_ordered <- t(apply(sim_mat, margin, sort,decreasing=TRUE, index.return=TRUE))
 
   # subset top N in each row/column
-  sim_topN <- lapply(sim_ordered, function(x) list(sim=x$x[1:N],index=x$ix[1:N]))
+  sim_topN <- lapply(sim_ordered, function(x) list(sim=as.list(x$x[1:N]),index=x$ix[1:N]))
 
   # Extract column/row names
   if(margin==1) names(sim_topN) <- rownames(sim_mat)
@@ -43,6 +43,7 @@ normaliseCoords <- function(coords) {
 #' Extracts metadata and embedding coordinates corresponding to each
 #' neighbourhood from a Milo object
 #' @importFrom miloR nhoodGraph
+#' @importFrom SingleCellExperiment reducedDim
 #' @importFrom igraph vertex_attr
 #' @export
 prepareNhoodData <- function(milo, dimred, colour_by, palette) {
@@ -64,6 +65,7 @@ prepareNhoodData <- function(milo, dimred, colour_by, palette) {
                    y_coord = dimred[,2])
 
   df <- cbind(df, coldata)
+  df <- as.list(df)
 
   return(df)
 
