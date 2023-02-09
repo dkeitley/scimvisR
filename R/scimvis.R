@@ -131,11 +131,18 @@ prepareMappings <- function(dist_mat, N_max) {
 #' @import htmlwidgets
 #' @export
 scimvis <- function(a_data, b_data, dist_mat, dimred = "UMAP", N_max = 5,
-                    colour_by, palette, a_title = "Dataset A", b_title = "Dataset B",
-                    width = NULL, height = NULL, elementId = NULL) {
+                    colour_by, palette, point_size = 2,
+                    a_title = "Dataset A", b_title = "Dataset B",
+                    opacity_low = 0.1, width = NULL, height = NULL,
+                    elementId = NULL) {
 
   x <- .prepareMilo(a_data, b_data, dist_mat, dimred, N_max,
                     colour_by, palette, a_title, b_title)
+
+  x$config <- list(point_size = point_size,
+                   opacity_low = opacity_low,
+                   point_size_large = 1.5*point_size,
+                   stroke_widt = '2')
 
   # create widget
   htmlwidgets::createWidget(

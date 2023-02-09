@@ -25,8 +25,9 @@ function SCIMVIS_2D(el, width, height) {
   var mappings = {};
   var a_title = "";
   var b_title = "";
+  var config = {};
 
-  this.renderSCIMVIS = function(el, a_data, b_data, mappings, a_title, b_title,
+  this.renderSCIMVIS = function(el, a_data, b_data, mappings, config, a_title, b_title,
           width, height) {
 
   	console.log("RENDERING SCIMVIS...");
@@ -36,6 +37,7 @@ function SCIMVIS_2D(el, width, height) {
     this.mappings = mappings;
     this.a_title = a_title;
     this.b_title = b_title;
+    this.config = config;
 
 
   	VIS_MARGIN = {top: 20, right: 20, bottom: 20, left: 20};
@@ -65,14 +67,14 @@ function SCIMVIS_2D(el, width, height) {
     console.log(b_pos);
 
     // Dipslay datasets
-    var a_dataset = new Dataset(id = "a", data = a_data, name = a_title);
-    var b_dataset = new Dataset(id = "b", data = b_data, name = b_title);
+    var a_dataset = new Dataset(id = "a", data = a_data, name = a_title, config = this.config);
+    var b_dataset = new Dataset(id = "b", data = b_data, name = b_title, this.config);
 
     a_dataset.show(svg, a_pos);
     b_dataset.show(svg, b_pos);
 
     // Make points interactive
-    var link = new DatasetLink(a_dataset, b_dataset, mappings)
+    var link = new DatasetLink(a_dataset, b_dataset, mappings, this.config)
     link.linkDatasets(0);
 
 
@@ -98,7 +100,7 @@ function SCIMVIS_2D(el, width, height) {
 
 
 
-function Dataset (id, data, title) {
+function Dataset (id, data, title, config) {
   var id = id;
   var name = title;
   var data = data;
@@ -108,10 +110,6 @@ function Dataset (id, data, title) {
   var x_axis;
   var y_axis;
 
-  // Dataset settings (e.g. point size)
-  var config = {
-    point_size: 10
-  }
 
   // Creates X and Y axes using D3
   this.addAxes = function(svg, pos) {
@@ -191,7 +189,7 @@ function Dataset (id, data, title) {
 
 
 
-function DatasetLink(a_data, b_data, mapping) {
+function DatasetLink(a_data, b_data, mapping, config) {
 
   var self = this;
   var datasets = [a_data, b_data];
@@ -201,11 +199,6 @@ function DatasetLink(a_data, b_data, mapping) {
   var mapping = mapping;
   var direction = 0;
 
-  var config = {
-    opacity_low: 0.1,
-    point_size_large: 7,
-    stroke_width: '2'
-  }
 
   this.showMappings = function(hover_point, opacity, point_size, show_stroke) {
 
