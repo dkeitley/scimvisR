@@ -12,8 +12,10 @@ scimvis(
   N_max = 5,
   colour_by,
   palette,
+  point_size = 2,
   a_title = "Dataset A",
   b_title = "Dataset B",
+  opacity_low = 0.1,
   width = NULL,
   height = NULL,
   elementId = NULL
