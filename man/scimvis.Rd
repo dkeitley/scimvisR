@@ -11,7 +11,7 @@ scimvis(
   dimred = "UMAP",
   N_max = 5,
   colour_by,
-  palette,
+  palette = NULL,
   point_size = 2,
   a_title = "Dataset A",
   b_title = "Dataset B",
@@ -27,4 +27,10 @@ a_data and b_data.}
 }
 \description{
 Display a scimvis widget.
+}
+\examples{
+scimvis(r_milo, m_milo, nhood_sim, colour_by = "celltype",
+palette = scrabbitr::getCelltypeColours())
+
+
 }

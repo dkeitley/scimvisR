@@ -37,30 +37,49 @@ normaliseCoords <- function(coords) {
   return(out)
 }
 
+.getDimRedSCE <- function(data, dimred) {
 
-#' Extract neighbourhood information
+}
+
+
+#' Extracts SCE dimred and colData info
 #'
 #' Extracts metadata and embedding coordinates corresponding to each
-#' neighbourhood from a Milo object
+#' cell/neighbourhood from a SCE/Milo object
 #' @importFrom miloR nhoodGraph
 #' @importFrom SingleCellExperiment reducedDim
 #' @importFrom igraph vertex_attr
 #' @export
-prepareNhoodData <- function(milo, dimred, colour_by, palette) {
+prepareDataSCE <- function(data, dimred, colour_by, palette) {
 
-  nhood_graph <- nhoodGraph(milo)
+  .checkDimred(data, dimred)
+  dimred <- reducedDim(data, dimred)
+  coldata <- as.data.frame(colData(data))
+  point_id <- colnames(data)
 
-  .checkDimred(milo, dimred)
-  dimred <- reducedDim(milo, dimred)[as.numeric(vertex_attr(nhood_graph)$name),]
+  if(class(data) == "Milo") {
+    nhood_graph <- nhoodGraph(data)
+    dimred <- dimred[as.numeric(vertex_attr(nhood_graph)$name),]
+    coldata <- coldata[as.numeric(vertex_attr(nhood_graph)$name), ]
+    point_id <- vertex_attr(nhood_graph)$name
+  }
+
   dimred <- normaliseCoords(dimred)
+  names(coldata) <- names(colData(data))
 
-  coldata <- as.data.frame(colData(milo)[as.numeric(vertex_attr(nhood_graph)$name), ])
-  names(coldata) <- names(colData(milo))
+  # Check colour_by is in coldata
+  if(!(colour_by %in% colnames(coldata))) {
+    stop(paste0(colour_by, " was not found in the colData."))
+  }
 
-  # TODO: Check colour_by is in coldata
-  coldata$colour <- palette[coldata[,colour_by]] #TODO: Add default palette
 
-  df <- data.frame(id = vertex_attr(nhood_graph)$name,
+  if(is.null(palette)) {
+    palette <- getDiscretePalette(coldata[,colour_by])
+  }
+
+  coldata$colour <- palette[coldata[,colour_by]]
+
+  df <- data.frame(id = point_id,
                    x_coord = dimred[,1],
                    y_coord = dimred[,2])
 
@@ -74,12 +93,48 @@ prepareNhoodData <- function(milo, dimred, colour_by, palette) {
 #' Check that the mapping object actually corresponds to points in a_data and b_data
 #' @importFrom miloR nhoods
 .checkDistMat <- function(a_data, b_data, dist_mat) {
-  # Assumes Milo object for now...
-  if(!isTRUE(all.equal(dim(dist_mat), c(ncol(nhoods(a_data)), ncol(nhoods(b_data)))))) {
-    stop("dist_mat has incorrect dimensions. Should have dimensions nrow(a_data) by nrow(b_data).")
+
+  if(class(a_data) == "Milo") {
+
+    if(is.null(rownames(dist_mat))) { rownames(dist_mat) <- unlist(a_data@nhoodIndex) }
+    if(is.null(colnames(dist_mat))) { colnames(dist_mat) <- unlist(b_data@nhoodIndex) }
+
+    if(!isTRUE(all.equal(dim(dist_mat), c(ncol(nhoods(a_data)), ncol(nhoods(b_data)))))) {
+      stop("dist_mat has incorrect dimensions. Should have dimensions nrow(a_data) by nrow(b_data).")
+    }
+
+    if(!all(rownames(dist_mat) == unlist(a_data@nhoodIndex))) {
+      stop("Row names of the distance matrix do not match with a_data nhood indices ")
+    }
+
+    if(!all(colnames(dist_mat) == unlist(b_data@nhoodIndex))) {
+      stop("Column names of the distance matrix do not match with b_data nhood indices. ")
+    }
   }
 
+  else if(class(a_data) == "SingleCellExperiment") {
+
+    if(is.null(rownames(dist_mat))) { rownames(dist_mat) <- colnames(a_data) }
+    if(is.null(colnames(dist_mat))) { colnames(dist_mat) <- colnames(b_data) }
+
+    if(!isTRUE(all.equal(dim(dist_mat), c(ncol(a_data), ncol(b_data))))) {
+      stop("dist_mat has incorrect dimensions. Should have dimensions nrow(a_data) by nrow(b_data).")
+    }
+
+    if(!all(rownames(dist_mat) == colnames(a_data))) {
+      stop("Row names of the distance matrix do not match with a_data colnames. ")
+    }
+
+    if(!all(colnames(dist_mat) == colnames(b_data))) {
+      stop("Column names of the distance matrix do not match with b_data colnames. ")
+    }
+
+  }
+
+  return(dist_mat)
+
 }
+
 
 prepareMappings <- function(dist_mat, N_max) {
   top_mappings <- getTopN(dist_mat, N_max)
@@ -94,18 +149,16 @@ prepareMappings <- function(dist_mat, N_max) {
 #' e.g.
 #' each point has id attribute
 #' each point has x_coord and y_coord values
-.prepareMilo <- function(a_milo, b_milo, dist_mat, dimred,
+.prepareSCE <- function(a_data, b_data, dist_mat, dimred,
                          N_max, colour_by, palette, a_title, b_title) {
-
-  # TODO: Multiple dispatch based on type of a_data, b_data
 
   # Allows for different dimred for each dataset
   if(length(dimred) == 1) { dimred <- rep(dimred, 2)}
 
-  a_df <- prepareNhoodData(a_milo, dimred[1], colour_by = colour_by, palette = palette)
-  b_df <- prepareNhoodData(b_milo, dimred[2], colour_by = colour_by, palette = palette)
+  a_df <- prepareDataSCE(a_data, dimred[1], colour_by = colour_by, palette = palette)
+  b_df <- prepareDataSCE(b_data, dimred[2], colour_by = colour_by, palette = palette)
 
-  .checkDistMat(a_milo, b_milo, dist_mat)
+  dist_mat <- .checkDistMat(a_data, b_data, dist_mat)
   mappings <- getTopN(dist_mat, N_max)
 
   x <- list(
@@ -120,27 +173,50 @@ prepareMappings <- function(dist_mat, N_max) {
 
 
 
+
+
+
+
 #' Display a scimvis widget.
 #'
 #' @param dist_mat A matrix of distance/similarity values between points of
 #' a_data and b_data.
 #'
-#' @example
-#'
+#' @examples
 #' scimvis(r_milo, m_milo, nhood_sim, colour_by = "celltype",
-#'  palette = scrabbitr::getCelltypeColours())
+#' palette = scrabbitr::getCelltypeColours())
 #'
 #'
 #' @import htmlwidgets
 #' @export
 scimvis <- function(a_data, b_data, dist_mat, dimred = "UMAP", N_max = 5,
-                    colour_by, palette, point_size = 2,
+                    colour_by, palette = NULL, point_size = 2,
                     a_title = "Dataset A", b_title = "Dataset B",
                     opacity_low = 0.1, width = NULL, height = NULL,
                     elementId = NULL) {
 
-  x <- .prepareMilo(a_data, b_data, dist_mat, dimred, N_max,
-                    colour_by, palette, a_title, b_title)
+
+  if(class(a_data)!= class(b_data)) {
+    stop("a_data and b_data must be of the same class.")
+  }
+
+  else if(class(a_data) == "Milo" | class(a_data) == "SingleCellExperiment") {
+    x <- .prepareSCE(a_data, b_data, dist_mat, dimred, N_max,
+                      colour_by, palette, a_title, b_title)
+  }
+
+  # TODO:
+  # else if(class(a_data) == "data.frame") {
+  #   .prepareDataFrame(a_data, b_data, dist_mat, dimred, N_max,
+  #                     colour_by, palette, a_title, b_title)
+  # }
+
+
+  else {
+    stop("a_data and b_data must be a SingleCellExperiment, Milo or data.frame object.")
+  }
+
+
 
   x$config <- list(point_size = point_size,
                    opacity_low = opacity_low,
