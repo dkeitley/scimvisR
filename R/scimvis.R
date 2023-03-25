@@ -37,9 +37,6 @@ normaliseCoords <- function(coords) {
   return(out)
 }
 
-.getDimRedSCE <- function(data, dimred) {
-
-}
 
 
 #' Extracts SCE dimred and colData info
@@ -60,12 +57,12 @@ prepareDataSCE <- function(data, dimred, colour_by, palette) {
   if(class(data) == "Milo") {
     nhood_graph <- nhoodGraph(data)
     dimred <- dimred[as.numeric(vertex_attr(nhood_graph)$name),]
-    coldata <- coldata[as.numeric(vertex_attr(nhood_graph)$name), ]
+    coldata <- as.data.frame(colData(data)[as.numeric(vertex_attr(nhood_graph)$name), ])
     point_id <- vertex_attr(nhood_graph)$name
   }
 
+  colnames(coldata) <- colnames(colData(data))
   dimred <- normaliseCoords(dimred)
-  names(coldata) <- names(colData(data))
 
   # Check colour_by is in coldata
   if(!(colour_by %in% colnames(coldata))) {
