@@ -1,3 +1,5 @@
+.gitignore
 .Rproj.user
 tests/
 scimvisR.Rproj
+.Rhistory
