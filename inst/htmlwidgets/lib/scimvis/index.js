@@ -40,7 +40,7 @@ function SCIMVIS_2D(el, width, height) {
     this.config = config;
 
 
-  	VIS_MARGIN = {top: 20, right: 20, bottom: 20, left: 20};
+  	VIS_MARGIN = {top: 50, right: 20, bottom: 20, left: 20};
     VIS_HEIGHT = height - VIS_MARGIN.top - VIS_MARGIN.bottom;
     VIS_WIDTH = width - VIS_MARGIN.left - VIS_MARGIN.right;
     AXES_GAP = 50;
@@ -54,13 +54,13 @@ function SCIMVIS_2D(el, width, height) {
 
   	 var a_pos = {
         xrange: [ 0, (VIS_WIDTH)/2 - AXES_GAP/2 ],
-        yrange: [ VIS_HEIGHT, 0]
+        yrange: [ VIS_HEIGHT, VIS_MARGIN.top]
 
      }
 
      var b_pos = {
        xrange: [(VIS_WIDTH)/2 + AXES_GAP/2, VIS_WIDTH + AXES_GAP/2 ],
-       yrange: [ VIS_HEIGHT, 0]
+       yrange: [ VIS_HEIGHT, VIS_MARGIN.top]
      }
 
     console.log(a_pos);
@@ -158,15 +158,31 @@ function Dataset (id, data, title, config) {
 
   }
 
-  this.show = function(svg, pos) {
+  this.addTitle = function(svg, pos) {
+    svg.append("text")
+      .attr("x", (pos.xrange[0] + (pos.xrange[1] - pos.xrange[0]) / 2))
+      .attr("y", (VIS_MARGIN.top)/2)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "30px")
+      .attr("font-family", "Arial")
+      .attr("font-weight", "bold")
+      .text(this.getName());
 
+  }
+
+  this.show = function(svg, pos) {
     this.addAxes(svg, pos);
     this.addPoints(svg);
+    this.addTitle(svg, pos);
 
   }
 
   this.getID = function() {
     return(id);
+  }
+
+  this.getName = function() {
+    return(name);
   }
 
   this.getPointIDs = function() {

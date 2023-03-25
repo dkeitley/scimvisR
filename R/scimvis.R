@@ -71,7 +71,7 @@ prepareDataSCE <- function(data, dimred, colour_by, palette) {
 
 
   if(is.null(palette)) {
-    palette <- getDiscretePalette(coldata[,colour_by])
+    palette <- getDiscretePalette(unique(coldata[,colour_by]))
   }
 
   coldata$colour <- palette[coldata[,colour_by]]

@@ -110,7 +110,7 @@ getDiscretePalette <- function(x) {
   if(class(x)=="int") return(godsnot_102[1:x])
   else if (length(x)>1) {
     pal <- godsnot_102[1:length(x)]
-    names(pal) <- names(x)
+    names(pal) <- x
     return(pal)
   }
 }
